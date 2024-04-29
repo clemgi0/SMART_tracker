@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Tracker App</string>
+    <string name="enable_button_text">Enable</string>
 </resources>

@@ -5,6 +5,12 @@
       <entry key="GreetingPreview">
         <State />
       </entry>
+      <entry key="GreetingWithButtonPrev">
+        <State />
+      </entry>
+      <entry key="MainActivity">
+        <State />
+      </entry>
       <entry key="app">
         <State />
       </entry>
