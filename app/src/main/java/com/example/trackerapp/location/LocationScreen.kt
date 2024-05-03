@@ -23,33 +23,38 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 
 @Composable
-fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = TextStyle(fontSize = 18.sp, color = Color.White)) {
+fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = TextStyle(fontSize = 18.sp, color = Color.Black)) {
     val context = LocalContext.current
     var locationText by remember { mutableStateOf("Debug text for location") }
+    var hasPermission by remember {
+        mutableStateOf(hasLocationPermission(context))
+    }
 
     // Create a permission launcher
     val requestPermissionLauncher =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission(),
-            onResult = { isGranted: Boolean ->
-                if (isGranted) {
-                    // Permission granted, update the location
+            contract = ActivityResultContracts.RequestMultiplePermissions(),
+            onResult = { permissions ->
+                hasPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+                if (hasPermission) {
                     getCurrentLocation(context) { lat, long ->
-                        locationText = "Latitude: $lat, Longitude: $long"
+                        locationText = "Your location\nLatitude: $lat, Longitude: $long"
                     }
                 } else {
                     Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
                 }
             })
-LaunchedEffect(Unit) {
-    if (hasLocationPermission(context)) {
+
+    LaunchedEffect(hasPermission) {
+    if (hasPermission) {
         // Permission already granted, update the location
         getCurrentLocation(context) { lat, long ->
-            locationText = "Latitude: $lat, Longitude: $long"
+            locationText = "Your location\n" +
+                    "Latitude: $lat, Longitude: $long"
         }
     } else {
         // Request location permission
-        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
     }
 }
 
