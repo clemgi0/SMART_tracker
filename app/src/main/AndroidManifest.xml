@@ -27,6 +27,9 @@
     <!-- Needed if Bluetooth is a critical piece of your app. -->
     <uses-feature android:name="android.hardware.bluetooth" android:required="true"/>
 
+    <!-- Internet permission (needed to make API requests) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

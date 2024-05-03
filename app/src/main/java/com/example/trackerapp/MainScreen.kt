@@ -22,10 +22,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.trackerapp.location.LocationScreen
+import com.example.trackerapp.utils.get
+import okhttp3.OkHttpClient
 
 @Composable
 fun MainScreen() {
 
+        val client = OkHttpClient()
+    get(url = "", client=client)
 
         Column(
             modifier = Modifier
@@ -53,7 +57,7 @@ fun MainScreen() {
                 fontWeight = FontWeight.Bold,
                 text = "Linked devices"
             )
-           LocationScreen(modifier = Modifier.fillMaxWidth(), textStyle = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center))
+           LocationScreen(modifier = Modifier.fillMaxWidth(), textStyle = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black, textAlign = TextAlign.Center))
         }
 }
 
