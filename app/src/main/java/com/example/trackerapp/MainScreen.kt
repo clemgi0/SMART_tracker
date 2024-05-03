@@ -29,7 +29,7 @@ import okhttp3.OkHttpClient
 fun MainScreen() {
 
         val client = OkHttpClient()
-    get(url = "", client=client)
+        //get(url = "http://10.0.2.2:8000", client=client)
 
         Column(
             modifier = Modifier
