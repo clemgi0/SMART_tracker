@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,32 +41,56 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.trackerapp.location.LocationScreen
-import com.example.trackerapp.utils.get
-import okhttp3.OkHttpClient
 import androidx.core.content.ContextCompat
+import com.example.trackerapp.location.LocationScreen
+import com.example.trackerapp.location.hasLocationPermission
 import kotlinx.coroutines.delay
 
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
+    // ------ API -------
+
+    //val client = OkHttpClient()
+    //get(url = "http://10.0.2.2:8000", client=client)
+
+    // ------ WIFI --------
 
     // Create a launcher for starting the Wi-Fi activity
     val wifiLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         // Handle the result if needed
     }
-
-    val client = OkHttpClient()
-    //get(url = "http://10.0.2.2:8000", client=client)
-
     // State to hold the current wifi signal strength
-    var wifiSignalStrength by remember { mutableStateOf(0) }
+    var wifiSignalStrength by remember { mutableIntStateOf(0) }
 
     // State to hold if the wifi signal is low
     var isWifiSignalLow by remember { mutableStateOf(false) }
 
+    // ------ LOCATION ------
+
+    // Create a permission launcher
+    val requestPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions(),
+            onResult = { permissions ->
+                val hasPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+                if (hasPermission) {
+                    Toast.makeText(context, "Location permission given", Toast.LENGTH_SHORT).show()
+                    } else {
+                    Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                }
+            })
+
     // Launch coroutine to periodically check wifi signal strength
     LaunchedEffect(Unit) {
+        if (!hasLocationPermission(context)) {
+            requestPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
+        }
         while (true) {
             // Get wifi signal strength
             wifiSignalStrength = getWifiSignalStrength(context)

@@ -22,7 +22,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.delay
 
-var LOCATION_UPDATE_DELAY = 5000L
+private const val LOCATION_UPDATE_DELAY = 5000L
 
 @Composable
 fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = LocalTextStyle.current) {
@@ -71,7 +71,7 @@ fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = LocalTe
         Text(text = locationText,modifier = modifier, style = textStyle)
 }
 
-private fun hasLocationPermission(context: Context): Boolean {
+fun hasLocationPermission(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(
         context,
         Manifest.permission.ACCESS_FINE_LOCATION
