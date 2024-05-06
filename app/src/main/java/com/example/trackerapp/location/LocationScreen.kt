@@ -20,6 +20,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.delay
+
+var LOCATION_UPDATE_DELAY = 5000L
 
 @Composable
 fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = LocalTextStyle.current) {
@@ -45,18 +48,26 @@ fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = LocalTe
             })
 
     LaunchedEffect(hasPermission) {
-    if (hasPermission) {
-        // Permission already granted, update the location
-        getCurrentLocation(context) { lat, long ->
-            locationText = "Your location\n" +
-                    "Latitude: $lat, Longitude: $long"
-        }
-    } else {
-        // Request location permission
-        requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+        while(true) {
+            if (hasPermission)
+                {
+                    // Permission already granted, update the location
+                    getCurrentLocation(context) { lat, long ->
+                        locationText = "Your location\n" +
+                                "Latitude: $lat, Longitude: $long"
+                    }
+                } else {
+                    // Request location permission
+                    requestPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                }
+            delay(LOCATION_UPDATE_DELAY)
+            }
     }
-}
-
         Text(text = locationText,modifier = modifier, style = textStyle)
 }
 

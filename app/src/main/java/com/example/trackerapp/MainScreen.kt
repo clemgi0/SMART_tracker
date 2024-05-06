@@ -22,13 +22,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.trackerapp.location.LocationScreen
-import com.example.trackerapp.utils.get
-import okhttp3.OkHttpClient
 
 @Composable
 fun MainScreen() {
 
-        val client = OkHttpClient()
+        //val client = OkHttpClient()
         //get(url = "http://10.0.2.2:8000", client=client)
 
         Column(
