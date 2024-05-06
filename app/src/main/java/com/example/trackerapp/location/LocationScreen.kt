@@ -99,7 +99,7 @@ fun LocationScreen(navController: NavController) {
     ) {
         Text(text = "Your location", style = TextStyle(color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold))
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = locationText, style = TextStyle(color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold))
+        Text(text = locationText, style = TextStyle(color = Color.White, fontSize = 20.sp))
     }
 }
 

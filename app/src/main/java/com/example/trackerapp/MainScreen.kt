@@ -150,6 +150,13 @@ fun MainScreen(navController : NavController) {
                 text = "Tracking"
             )
             Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                color = Color.White,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(16.dp),
+                text = "Device ID: " + GlobalVariables.idDevice
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
             if(isWifiSignalLow) {
                 if (!isStatusAlert) {
