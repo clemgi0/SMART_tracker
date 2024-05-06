@@ -8,6 +8,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,9 +21,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.trackerapp.GlobalVariables
@@ -40,7 +51,7 @@ private const val LOCATION_UPDATE_INTERVAL = 5000L
 @Composable
 fun LocationScreen(navController: NavController) {
     val context = LocalContext.current
-    var locationText by remember { mutableStateOf("Debug text for location") }
+    var locationText by remember { mutableStateOf("") }
     var hasPermission by remember {
         mutableStateOf(hasLocationPermission(context))
     }
@@ -53,7 +64,7 @@ fun LocationScreen(navController: NavController) {
                 hasPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
                 if (hasPermission) {
                     startLocationUpdates(context) { lat, long ->
-                        locationText = "Your location\nLatitude: $lat, Longitude: $long"
+                        locationText = "Latitude: $lat\nLongitude: $long"
                     }
                 } else {
                     Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
@@ -65,8 +76,8 @@ fun LocationScreen(navController: NavController) {
                 {
                     // Permission already granted, update the location
                     startLocationUpdates(context) { lat, long ->
-                        locationText = "Your location\n" +
-                                "Latitude: $lat, Longitude: $long"
+                        locationText =
+                                "Latitude: $lat\n Longitude: $long"
                         sendPosition(lat, long)
                     }
                 } else {
@@ -79,7 +90,16 @@ fun LocationScreen(navController: NavController) {
                     )
                 }
     }
-        Text(text = locationText, style = TextStyle(color = Color.Black))
+    Column(
+        modifier = Modifier
+            .padding(vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = "Your location", style = TextStyle(color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold))
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = locationText, style = TextStyle(color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold))
+    }
 }
 
 fun hasLocationPermission(context: Context): Boolean {
@@ -109,7 +129,7 @@ fun startLocationUpdates(context: Context, callback: (Double, Double) -> Unit) {
     }
 
     if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
     } else {
         // If neither permission is granted, consider providing additional guidance or fallback behavior
         Toast.makeText(context, "No location permission granted", Toast.LENGTH_SHORT).show()
@@ -121,7 +141,6 @@ private fun sendPosition(latitude: Double, longitude: Double) {
 
     // The latitude and longitude should be the Wifi location
     val requestBody = "{\"latitude\":${latitude},\"longitude\":${longitude},\"tracker_id\":${GlobalVariables.idDevice}}".toRequestBody("application/json; charset=utf-8".toMediaType())
-    Log.d("requestBody", requestBody.toString())
     val request = Request.Builder()
         .url(url)
         .post(requestBody)

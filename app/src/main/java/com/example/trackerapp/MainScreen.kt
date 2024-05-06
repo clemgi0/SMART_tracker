@@ -41,7 +41,15 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.trackerapp.location.LocationScreen
 import com.example.trackerapp.location.hasLocationPermission
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
 
 @Composable
 fun MainScreen(navController : NavController) {
@@ -62,6 +70,8 @@ fun MainScreen(navController : NavController) {
 
     // State to hold if the wifi signal is low
     var isWifiSignalLow by remember { mutableStateOf(false) }
+
+    var isStatusAlert by remember { mutableStateOf(false) }
 
     // ------ LOCATION ------
 
@@ -94,7 +104,7 @@ fun MainScreen(navController : NavController) {
             // Check if wifi signal is low
             isWifiSignalLow = wifiSignalStrength < LOW_SIGNAL_THRESHOLD
             Log.d("wifi", wifiSignalStrength.toString())
-            Toast.makeText(context, wifiSignalStrength.toString(), Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, wifiSignalStrength.toString(), Toast.LENGTH_SHORT).show()
             delay(CHECK_INTERVAL)
         }
     }
@@ -119,30 +129,40 @@ fun MainScreen(navController : NavController) {
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo"
         )
-        Text(
-            color = Color.White,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            text = "Linked devices"
-        )
-        if(true) {
-            Column {
+        if(isWifiSignalLow) {
+            if (!isStatusAlert) {
+                isStatusAlert = true
+                updateStatus(1)
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 10.dp, horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
                 LocationScreen(navController)
             }
+        } else {
+            if (isStatusAlert) {
+                isStatusAlert = false
+                updateStatus(0)
+            }
         }
-        Button(
-            shape = RoundedCornerShape(0.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color(0xFFD71729)
-            ),
-            onClick = {
-                val intent = Intent(WifiManager.ACTION_PICK_WIFI_NETWORK)
-                wifiLauncher.launch(intent) // Launch the Wi-Fi activity
-            },
-        ) {
-            Text(text = "Wifi")
-        }
+        //Button(
+            //shape = RoundedCornerShape(0.dp),
+            //colors = ButtonDefaults.buttonColors(
+                //containerColor = Color.White,
+                //contentColor = Color(0xFFD71729)
+            //),
+            //onClick = {
+                //val intent = Intent(WifiManager.ACTION_PICK_WIFI_NETWORK)
+                //wifiLauncher.launch(intent) // Launch the Wi-Fi activity
+            //},
+        //) {
+            //Text(text = "Wifi")
+        //}
 
     }
 }
@@ -179,5 +199,27 @@ fun calculateSignalLevel(rssi: Int, numLevels: Int): Int {
         val inputRange = MAX_RSSI - MIN_RSSI
         val outputRange = numLevels - 1
         return ((rssi - MIN_RSSI) * outputRange) / inputRange
+    }
+}
+
+fun updateStatus(status: Int){
+    val url = "http://10.0.2.2:8000/setstatus"
+
+    // The latitude and longitude should be the Wifi location
+    val requestBody = "{\"id\":${GlobalVariables.idDevice},\"status\":${status}}".toRequestBody("application/json; charset=utf-8".toMediaType())
+    val request = Request.Builder()
+        .url(url)
+        .post(requestBody)
+        .build()
+
+    val client = OkHttpClient()
+
+    // Save the id_device into the device
+    GlobalScope.launch(Dispatchers.IO) {
+        try {
+            client.newCall(request).execute()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 }

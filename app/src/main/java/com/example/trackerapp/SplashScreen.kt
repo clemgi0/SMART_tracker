@@ -80,11 +80,11 @@ fun SplashScreen(navController: NavController) {
         }
         else {
             GlobalVariables.idDevice = idDevice
-            Toast.makeText(context, "id_device found. Value: $idDevice", Toast.LENGTH_LONG).show()
+            //Toast.makeText(context, "id_device found. Value: $idDevice", Toast.LENGTH_LONG).show()
         }
 
         navController.popBackStack()
-        navController.navigate(AppScreens.LoginScreen.route)
+        navController.navigate(AppScreens.MainScreen.route)
     }
 
     Splash()

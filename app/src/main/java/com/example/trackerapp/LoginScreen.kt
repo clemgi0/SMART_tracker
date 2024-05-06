@@ -68,7 +68,6 @@ fun LoginScreen(navController: NavController) {
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo"
             )
-            Text(color = Color.White, text = "ID_DEVICE: "+ GlobalVariables.idDevice.toString())
             Text(
                 color = Color.White,
                 fontSize = 26.sp,
