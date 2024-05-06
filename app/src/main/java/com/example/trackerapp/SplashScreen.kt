@@ -29,6 +29,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -43,13 +45,10 @@ fun SplashScreen(navController: NavController) {
 
         // If the device hasn't an id_device, create one
         if (idDevice == null) {
-            val url = "http://localhost:8000/add_tracker"
+            val url = "http://10.0.2.2:8000/addtracker"
 
             // The latitude and longitude should be the Wifi location
-            val requestBody = FormBody.Builder()
-                .add("latitude", "168.2")
-                .add("longitude", "200.5")
-                .build()
+            val requestBody = "{\"latitude\":1,\"longitude\":2}".toRequestBody("application/json; charset=utf-8".toMediaType())
 
             val request = Request.Builder()
                 .url(url)
@@ -66,12 +65,12 @@ fun SplashScreen(navController: NavController) {
                         val responseData = response.body?.string()
                         val editor = sharedPreferences.edit()
                         editor.putString("id_device", responseData)
-                        Toast.makeText(context, "id_device: $responseData", Toast.LENGTH_LONG).show()
+                        //Toast.makeText(context, "id_device: $responseData", Toast.LENGTH_LONG).show()
                         editor.apply()
                         GlobalVariables.idDevice = responseData
 
                     } else {
-                        Toast.makeText(context, "id_device couldn't be generated", Toast.LENGTH_LONG).show()
+                        //Toast.makeText(context, "id_device couldn't be generated", Toast.LENGTH_LONG).show()
                     }
                 } catch (e: IOException) {
                     e.printStackTrace()
