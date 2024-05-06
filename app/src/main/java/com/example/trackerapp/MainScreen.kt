@@ -10,17 +10,23 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,12 +41,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.trackerapp.location.LocationScreen
 import com.example.trackerapp.location.hasLocationPermission
+import com.example.trackerapp.navigation.AppScreens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -119,51 +128,64 @@ fun MainScreen(navController : NavController) {
                         Color(0xFFD71729)
                     )
                 )
-            )
-            .padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+            ),
     ) {
-        Image(
-            modifier = Modifier.size(150.dp, 150.dp),
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Logo"
-        )
-        if(isWifiSignalLow) {
-            if (!isStatusAlert) {
-                isStatusAlert = true
-                updateStatus(1)
-            }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Image(
+                modifier = Modifier.size(150.dp, 150.dp),
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Logo"
+            )
+            Text(
+                color = Color.White,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp),
+                text = "Tracking"
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 10.dp, horizontal = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                LocationScreen(navController)
+            if(isWifiSignalLow) {
+                if (!isStatusAlert) {
+                    isStatusAlert = true
+                    updateStatus(1)
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    LocationScreen(navController)
+                }
+            } else {
+                if (isStatusAlert) {
+                    isStatusAlert = false
+                    updateStatus(0)
+                }
             }
-        } else {
-            if (isStatusAlert) {
-                isStatusAlert = false
-                updateStatus(0)
-            }
-        }
-        //Button(
+            //Button(
             //shape = RoundedCornerShape(0.dp),
             //colors = ButtonDefaults.buttonColors(
-                //containerColor = Color.White,
-                //contentColor = Color(0xFFD71729)
+            //containerColor = Color.White,
+            //contentColor = Color(0xFFD71729)
             //),
             //onClick = {
-                //val intent = Intent(WifiManager.ACTION_PICK_WIFI_NETWORK)
-                //wifiLauncher.launch(intent) // Launch the Wi-Fi activity
+            //val intent = Intent(WifiManager.ACTION_PICK_WIFI_NETWORK)
+            //wifiLauncher.launch(intent) // Launch the Wi-Fi activity
             //},
-        //) {
+            //) {
             //Text(text = "Wifi")
-        //}
-
+            //}
+        }
     }
 }
 

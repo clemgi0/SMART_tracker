@@ -92,9 +92,10 @@ fun LocationScreen(navController: NavController) {
     }
     Column(
         modifier = Modifier
-            .padding(vertical = 10.dp),
+            .fillMaxSize()
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.Top
     ) {
         Text(text = "Your location", style = TextStyle(color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold))
         Spacer(modifier = Modifier.height(16.dp))
