@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -116,11 +117,11 @@ fun startLocationUpdates(context: Context, callback: (Double, Double) -> Unit) {
 }
 
 private fun sendPosition(latitude: Double, longitude: Double) {
-    val url = "http://localhost:8000/addposition"
+    val url = "http://10.0.2.2:8000/addposition"
 
     // The latitude and longitude should be the Wifi location
     val requestBody = "{\"latitude\":${latitude},\"longitude\":${longitude},\"tracker_id\":${GlobalVariables.idDevice}}".toRequestBody("application/json; charset=utf-8".toMediaType())
-
+    Log.d("requestBody", requestBody.toString())
     val request = Request.Builder()
         .url(url)
         .post(requestBody)
