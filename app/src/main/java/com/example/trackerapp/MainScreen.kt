@@ -15,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,10 +34,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.trackerapp.location.LocationScreen
+import com.example.trackerapp.utils.get
+import okhttp3.OkHttpClient
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 
@@ -48,6 +54,9 @@ fun MainScreen() {
     val wifiLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         // Handle the result if needed
     }
+
+    val client = OkHttpClient()
+    //get(url = "http://10.0.2.2:8000", client=client)
 
     // State to hold the current wifi signal strength
     var wifiSignalStrength by remember { mutableStateOf(0) }
@@ -94,12 +103,17 @@ fun MainScreen() {
             fontWeight = FontWeight.Bold,
             text = "Linked devices"
         )
-        Text(
-            color = Color.White,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            text = "Longitude : ${1} | Latitude : ${2}"
-        )
+        if(isWifiSignalLow) {
+            LocationScreen(
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            )
+        }
         Button(
             shape = RoundedCornerShape(0.dp),
             colors = ButtonDefaults.buttonColors(
@@ -113,12 +127,13 @@ fun MainScreen() {
         ) {
             Text(text = "Wifi")
         }
+
     }
 }
 
 // Constants
 private const val CHECK_INTERVAL = 5000L // Check wifi signal strength every 5 seconds
-private const val LOW_SIGNAL_THRESHOLD = 20 // Define your low signal strength threshold here
+private const val LOW_SIGNAL_THRESHOLD = 70 // Define your low signal strength threshold here
 
 fun getWifiSignalStrength(context: Context): Int {
     // Check if the app has permission to access Wi-Fi state
