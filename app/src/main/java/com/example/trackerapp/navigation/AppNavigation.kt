@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.trackerapp.LoginScreen
 import com.example.trackerapp.MainScreen
 import com.example.trackerapp.SplashScreen
+import com.example.trackerapp.location.LocationScreen
 
 @Composable
 fun AppNavigation() {
@@ -24,7 +25,10 @@ fun AppNavigation() {
             LoginScreen(navController)
         }
         composable(AppScreens.MainScreen.route) {
-            MainScreen()
+            MainScreen(navController)
+        }
+        composable(AppScreens.LocationScreen.route){
+            LocationScreen(navController)
         }
     }
 }

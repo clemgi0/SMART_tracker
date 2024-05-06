@@ -3,10 +3,10 @@ package com.example.trackerapp.location
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Looper
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,18 +14,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
+import com.example.trackerapp.GlobalVariables
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
 
-private const val LOCATION_UPDATE_DELAY = 5000L
+
+private const val LOCATION_UPDATE_INTERVAL = 5000L
 
 @Composable
-fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = LocalTextStyle.current) {
+fun LocationScreen(navController: NavController) {
     val context = LocalContext.current
     var locationText by remember { mutableStateOf("Debug text for location") }
     var hasPermission by remember {
@@ -39,7 +51,7 @@ fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = LocalTe
             onResult = { permissions ->
                 hasPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
                 if (hasPermission) {
-                    getCurrentLocation(context) { lat, long ->
+                    startLocationUpdates(context) { lat, long ->
                         locationText = "Your location\nLatitude: $lat, Longitude: $long"
                     }
                 } else {
@@ -48,13 +60,13 @@ fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = LocalTe
             })
 
     LaunchedEffect(hasPermission) {
-        while(true) {
             if (hasPermission)
                 {
                     // Permission already granted, update the location
-                    getCurrentLocation(context) { lat, long ->
+                    startLocationUpdates(context) { lat, long ->
                         locationText = "Your location\n" +
                                 "Latitude: $lat, Longitude: $long"
+                        sendPosition(lat, long)
                     }
                 } else {
                     // Request location permission
@@ -65,10 +77,8 @@ fun LocationScreen(modifier: Modifier = Modifier, textStyle: TextStyle = LocalTe
                         )
                     )
                 }
-            delay(LOCATION_UPDATE_DELAY)
-            }
     }
-        Text(text = locationText,modifier = modifier, style = textStyle)
+        Text(text = locationText, style = TextStyle(color = Color.Black))
 }
 
 fun hasLocationPermission(context: Context): Boolean {
@@ -83,29 +93,53 @@ fun hasLocationPermission(context: Context): Boolean {
             ) == PackageManager.PERMISSION_GRANTED
 }
 
-private fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {
+fun startLocationUpdates(context: Context, callback: (Double, Double) -> Unit) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    callback(location.latitude, location.longitude)
-                    Toast.makeText(context, "Location updated", Toast.LENGTH_SHORT).show()
-                }
+    val locationRequest = LocationRequest.Builder(100, 2500L)
+        .setIntervalMillis(LOCATION_UPDATE_INTERVAL)
+        .build()
+
+    val locationCallback = object : LocationCallback() {
+       override fun onLocationResult(p0: LocationResult) {
+            for (location in p0.locations) {
+                callback(location.latitude, location.longitude)
             }
-            .addOnFailureListener { exception ->
-                Toast.makeText(context, "Location couldn't be fetched", Toast.LENGTH_SHORT).show()
-                exception.printStackTrace()
-            }
+        }
+    }
+
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     } else {
         // If neither permission is granted, consider providing additional guidance or fallback behavior
         Toast.makeText(context, "No location permission granted", Toast.LENGTH_SHORT).show()
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LocationScreenPreview(){
-LocationScreen()
+private fun sendPosition(latitude: Double, longitude: Double) {
+    val url = "http://localhost:8000/addposition"
+
+    // The latitude and longitude should be the Wifi location
+    val requestBody = "{\"latitude\":${latitude},\"longitude\":${longitude},\"tracker_id\":${GlobalVariables.idDevice}}".toRequestBody("application/json; charset=utf-8".toMediaType())
+
+    val request = Request.Builder()
+        .url(url)
+        .post(requestBody)
+        .build()
+
+    val client = OkHttpClient()
+
+    // Save the id_device into the device
+    GlobalScope.launch(Dispatchers.IO) {
+        try {
+            client.newCall(request).execute()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
 }
+
+//@Preview(showBackground = true)
+//@Composable
+//fun LocationScreenPreview(){
+//LocationScreen(navController)
+//}

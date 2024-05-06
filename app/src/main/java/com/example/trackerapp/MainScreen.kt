@@ -15,7 +15,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,19 +34,17 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import com.example.trackerapp.location.LocationScreen
 import com.example.trackerapp.location.hasLocationPermission
 import kotlinx.coroutines.delay
 
 @Composable
-fun MainScreen() {
+fun MainScreen(navController : NavController) {
     val context = LocalContext.current
     // ------ API -------
 
@@ -128,16 +125,10 @@ fun MainScreen() {
             fontWeight = FontWeight.Bold,
             text = "Linked devices"
         )
-        if(isWifiSignalLow) {
-            LocationScreen(
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = TextStyle(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    textAlign = TextAlign.Center
-                )
-            )
+        if(true) {
+            Column {
+                LocationScreen(navController)
+            }
         }
         Button(
             shape = RoundedCornerShape(0.dp),
@@ -189,11 +180,4 @@ fun calculateSignalLevel(rssi: Int, numLevels: Int): Int {
         val outputRange = numLevels - 1
         return ((rssi - MIN_RSSI) * outputRange) / inputRange
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    MainScreen()
 }
